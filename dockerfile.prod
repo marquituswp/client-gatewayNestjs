@@ -1,0 +1,40 @@
+# Etapa 1: Instalar dependencias de desarrollo
+FROM node:21-alpine3.19 AS deps
+
+WORKDIR /usr/src/app
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN corepack enable && pnpm install
+
+
+# Etapa 2: Build
+FROM node:21-alpine3.19 AS builder
+
+WORKDIR /usr/src/app
+
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY . .
+
+# RUN pnpm run test
+RUN corepack enable && pnpm run build
+
+
+# Etapa 3: Producción
+FROM node:21-alpine3.19 AS prod
+
+WORKDIR /usr/src/app
+
+# Copia solo las dependencias de producción
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && pnpm install --frozen-lockfile --prod && pnpm store prune
+
+# Copia solo lo necesario para producción
+COPY --from=builder /usr/src/app/dist ./dist
+
+ENV NODE_ENV=production
+USER node
+
+EXPOSE 3000
+
+CMD ["node", "dist/src/main.js"]

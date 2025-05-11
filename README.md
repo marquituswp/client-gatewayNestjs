@@ -1,4 +1,11 @@
-## Cliente Gateway
+# API Gateway
+
+Entry point for clients. Routes HTTP requests to microservices via NATS or HTTP.
+
+## Tech Stack
+
+- NestJS
+- NATSç
 
 El gateway es el punto de comunicación entre nuestros clientes y nuestros servicios.
 Es el encargado de recibir las peticiones, enviarlas a los servicios
